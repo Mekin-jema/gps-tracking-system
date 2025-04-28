@@ -11,7 +11,7 @@ interface MapProps {
 
 export default function Map({ vehicles }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map>();
+  const mapRef = useRef<maplibregl.Map | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -19,8 +19,8 @@ export default function Map({ vehicles }: MapProps) {
     mapRef.current = new maplibregl.Map({
       container: mapContainer.current,
       style: "https://demotiles.maplibre.org/style.json",
-      center: [38.74, 9.03],
-      zoom: 12,
+      center:[38.7613, 9.0108],
+      zoom: 30,
     });
 
     return () => {
@@ -31,21 +31,30 @@ export default function Map({ vehicles }: MapProps) {
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Remove old markers (optional if you refresh often)
-    mapRef.current.eachLayer(layer => {
-      if (layer.id.startsWith('marker-')) {
-        mapRef.current!.removeLayer(layer.id);
-      }
-    });
+    // Maintain a reference to markers
+    const markers: maplibregl.Marker[] = [];
+
+    // Remove old markers
+    markers.forEach(marker => marker.remove());
+    markers.length = 0;
 
     // Add new markers
     vehicles.forEach(vehicle => {
-      new maplibregl.Marker()
+      const marker = new maplibregl.Marker()
         .setLngLat([vehicle.location.lng, vehicle.location.lat])
         .setPopup(new maplibregl.Popup().setText(vehicle.plateNumber))
         .addTo(mapRef.current!);
+      markers.push(marker);
     });
   }, [vehicles]);
 
-  return <div ref={mapContainer} className="w-full h-screen" />;
+  
+
+  return(
+    <>
+      <h1 className="text-2xl font-bold text-center mb-4">Vehicle Map</h1>
+      <p className="text-center mb-4">Click on a marker to see the vehicle's plate number.</p>
+      <div ref={mapContainer} className="w-full h-screen " />
+    </>
+  )
 }
