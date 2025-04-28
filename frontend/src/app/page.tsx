@@ -1,4 +1,18 @@
 import Map from "@/components/map";
+import io from "socket.io-client";
+
+
+const socket=io("http://localhost:5000", {
+  transports: ["websocket"],
+  autoConnect: false,
+  reconnectionDelay: 1000,
+  reconnectionAttempts: Infinity,
+  timeout: 20000,
+
+ 
+  upgrade: false,
+  forceNew: true })
+
 
 
 const vehicles = [
@@ -46,7 +60,7 @@ export default async function HomePage() {
 
   return (
     <main>
-      <Map vehicles={vehicles} />
+      <Map />
     </main>
   );
 }

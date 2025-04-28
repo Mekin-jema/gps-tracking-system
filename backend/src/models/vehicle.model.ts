@@ -1,21 +1,32 @@
-import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IVehicle extends Document {
-  plateNumber: string;
-  location: {
-    lat: number;
-    lng: number;
+import mongoose, { Document, Model, Schema } from "mongoose";
+
+// Plain interface for fields
+export interface IVehicle{
+  registrationNumber: string;
+  model: string;
+  driver: mongoose.Types.ObjectId;
+  currentLocation?: {
+    type: string;
+    coordinates: [number, number];
   };
-  updatedAt: Date;
+  lastUpdated?: Date;
+  isActive?: boolean;
 }
 
-const VehicleSchema = new Schema<IVehicle>({
-  plateNumber: { type: String, required: true },
-  location: {
-    lat: { type: Number, required: true },
-    lng: { type: Number, required: true },
+// Schema definition
+const VehicleSchema: Schema<IVehicle> = new mongoose.Schema({
+  registrationNumber: { type: String, required: true, unique: true },
+  model: { type: String, required: true },
+  driver: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  currentLocation: {
+    type: { type: String, enum: ['Point'], default: 'Point' },
+    coordinates: { type: [Number], default: [0, 0] }
   },
-  updatedAt: { type: Date, default: Date.now }
+  lastUpdated: { type: Date, default: Date.now },
+  isActive: { type: Boolean, default: true }
 });
 
-export const Vehicle = mongoose.model<IVehicle>('Vehicle', VehicleSchema);
+
+const Vechicle:Model<IVehicle>=mongoose.model('Vehicle', VehicleSchema );
+export default Vechicle;

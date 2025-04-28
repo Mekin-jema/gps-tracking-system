@@ -14,12 +14,12 @@ interface DeliveryMarker {
   marker: maplibregl.Marker;
 }
 
-export default function Map({ vehicles }: MapProps) {
+export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const deliveryMarkersRef = useRef<Record<string, maplibregl.Marker>>({});
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  // const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   // Initialize map
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function Map({ vehicles }: MapProps) {
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: "https://demotiles.maplibre.org/style.json",
+      style: "https://api.maptiler.com/maps/streets-v2/style.json?key=u9EnL0tM9ZS24uoyFpL7",
       center: [38.7613, 9.0108],
       zoom: 12, // Reduced from 30 to more reasonable zoom level
     });
@@ -35,7 +35,7 @@ export default function Map({ vehicles }: MapProps) {
     mapRef.current = map;
 
     map.on("load", () => {
-      setIsMapLoaded(true);
+      // setIsMapLoaded(true);
       // Initialize any map-dependent functionality here
     });
 
@@ -46,21 +46,21 @@ export default function Map({ vehicles }: MapProps) {
 
   // Update vehicle markers
   useEffect(() => {
-    if (!mapRef.current || !isMapLoaded) return;
+    if (!mapRef.current ) return;
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // Add new markers
-    vehicles.forEach(vehicle => {
-      const marker = new maplibregl.Marker()
-        .setLngLat([vehicle.location.lng, vehicle.location.lat])
-        .setPopup(new maplibregl.Popup().setText(vehicle.plateNumber))
-        .addTo(mapRef.current!);
-      markersRef.current.push(marker);
-    });
-  }, [vehicles, isMapLoaded]);
+    // // Add new markers
+    // vehicles.forEach(vehicle => {
+    //   const marker = new maplibregl.Marker()
+    //     .setLngLat([vehicle.location.lng, vehicle.location.lat])
+    //     .setPopup(new maplibregl.Popup().setText(vehicle.plateNumber))
+    //     .addTo(mapRef.current!);
+    //   markersRef.current.push(marker);
+    // });
+  }, []);
 
   // Delivery tracking functions
   const updateDeliveryPosition = (deliveryId: string, lngLat: [number, number]) => {
@@ -134,7 +134,7 @@ export default function Map({ vehicles }: MapProps) {
 
   // Example usage - would be triggered by some event or prop change
   useEffect(() => {
-    if (!isMapLoaded) return;
+    // if (!isMapLoaded) return;
 
     // Simulate delivery tracking
     const interval = setInterval(() => {
@@ -149,7 +149,7 @@ export default function Map({ vehicles }: MapProps) {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isMapLoaded]);
+  }, []);
 
   return (
     <div className="relative w-full h-full">
