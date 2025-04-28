@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { NextFunction, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import userModel from '../models/user.model';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import userModel, { IUser } from '../models/user.model';
 // import User from '../models/User';
 
 const router = express.Router();
@@ -64,5 +64,73 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 });
+
+
+
+router.get('/me', async (req, res) => {
+
+  try {
+    // @ts-ignore
+    const token = req.cookies.token;
+    // console.log(token);
+
+    if (!token) {
+      return res.status(401).json({ message: 'Not authorized, no token' });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as JwtPayload;
+
+    if (!decoded) {
+
+      return res.status(401).json({ message: 'Not authorized, no token' });
+    }
+
+    const user = await userModel.findById(decoded.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+});
+
+
+interface AuthRequest extends Request {
+  user?: IUser;
+}
+
+// Middleware to protect routes
+// const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
+//   try {
+//     let token: string | undefined;
+
+//     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+//       token = req.headers.authorization.split(' ')[1];
+
+//       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { id: string };
+
+//       const user = await userModel.findById(decoded.id).select('-password');
+//       if (!user) {
+//         return res.status(404).json({ message: 'User not found' });
+//       }
+
+//       req.user = user; // ✅ Now TypeScript knows about `user`
+//       next();
+//     } else {
+//       return res.status(401).json({ message: 'Not authorized, no token' });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(401).json({ message: 'Not authorized' });
+//   }
+// };
+
+
+
 
 export default router;

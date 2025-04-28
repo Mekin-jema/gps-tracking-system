@@ -28,11 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function loadUser() {
+      console.log('Loading user...');
       try {
         const token = localStorage.getItem('token');
         if (token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
+          console.log(res.data);
           setUser(res.data.user);
         }
       } catch (error) {
