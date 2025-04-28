@@ -30,9 +30,15 @@ const io = new Server(server, {
 });
 
 // Middleware
-app.use(cors());
-app.use(helmet());
-app.use(morgan('dev'));
+app.use(cors(
+  {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST']
+  }
+));
+app.use(helmet());// Security headers
+app.use(morgan('dev')); // Logging middleware  used to log requests 
 app.use(express.json());
 
 // Database connection
